@@ -2,16 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#401815">
   <meta name="description" content="Download Read Often, a beautiful book tracker and digital bookshelf for iPhone.">
-  <meta http-equiv="refresh" content="0; url=https://apps.apple.com/app/id6796871183">
   <link rel="canonical" href="https://apps.apple.com/app/id6796871183">
   <title>Opening Read Often…</title>
-  <script>
-    window.location.replace("https://apps.apple.com/app/id6796871183");
-  </script>
+  <style>
+    :root { color-scheme: dark; --cream:#fff4dd; --gold:#e9b968; --wine:#401815; }
+    * { box-sizing:border-box; }
+    html, body { min-height:100%; }
+    body {
+      margin:0; min-height:100svh; color:var(--cream); cursor:pointer;
+      font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 50% 20%, #9e4a37 0, transparent 34%),
+        radial-gradient(circle at 15% 90%, #6e332d 0, transparent 30%),
+        linear-gradient(155deg, #2a1112 0%, #5d201b 55%, #251011 100%);
+    }
+    main { min-height:100svh; display:grid; place-items:center; padding:36px 24px max(36px,env(safe-area-inset-bottom)); text-align:center; }
+    .content { width:min(100%,440px); }
+    .icon { width:112px; height:112px; border-radius:25px; box-shadow:0 20px 50px #18070688,0 0 0 1px #ffd99545; }
+    .eyebrow { margin:28px 0 8px; color:var(--gold); font-size:12px; font-weight:750; letter-spacing:.18em; text-transform:uppercase; }
+    h1 { margin:0; font:700 clamp(34px,10vw,52px)/1.02 ui-serif,Georgia,serif; letter-spacing:-.035em; }
+    .message { margin:14px auto 28px; max-width:330px; color:#f5dfc9; line-height:1.55; }
+    .store-button, .secondary {
+      display:flex; align-items:center; justify-content:center; width:100%; min-height:58px;
+      border:0; border-radius:999px; padding:16px 22px; font:750 16px/1 ui-sans-serif,-apple-system,sans-serif;
+      text-decoration:none; cursor:pointer;
+    }
+    .store-button { background:var(--cream); color:#321313; box-shadow:0 12px 34px #18070666; }
+    .store-button:active, .secondary:active { transform:scale(.985); }
+    .hint { min-height:18px; margin:16px 0 0; color:#dfc4ad; font-size:13px; }
+    dialog { width:min(calc(100% - 32px),420px); border:1px solid #f5d99d36; border-radius:24px; padding:0; color:var(--cream); background:#351617; box-shadow:0 26px 80px #100405cc; }
+    dialog::backdrop { background:#140909b8; backdrop-filter:blur(6px); }
+    .modal { padding:26px; text-align:center; }
+    .modal h2 { margin:0 0 10px; font:700 27px/1.1 ui-serif,Georgia,serif; }
+    .modal p { margin:0 0 20px; color:#e8cfbc; line-height:1.5; }
+    .steps { padding:13px 16px; margin-bottom:18px; border-radius:14px; background:#ffffff0a; color:#fff0d8; }
+    .secondary { min-height:48px; margin-top:9px; background:#ffffff12; color:var(--cream); }
+  </style>
+  <script src="../assets/app-store-handoff.js"></script>
 </head>
 <body>
-  <p>If the App Store does not open automatically, <a href="https://apps.apple.com/app/id6796871183">open Read Often on the App Store</a>.</p>
+  <main id="handoff-page">
+    <div class="content">
+      <img class="icon" src="../assets/app-icon.png" alt="Read Often app icon">
+      <p class="eyebrow">Read Often for iPhone</p>
+      <h1>Your next chapter awaits.</h1>
+      <p class="message">Opening Read Often in the App Store…</p>
+      <a class="store-button" id="open-store" href="https://apps.apple.com/app/id6796871183">Open in the App Store</a>
+      <p class="hint" id="hint">If nothing happens, tap anywhere.</p>
+    </div>
+  </main>
+
+  <dialog id="fallback">
+    <div class="modal">
+      <h2>Open in your browser</h2>
+      <p>Instagram may block App Store links inside its browser.</p>
+      <div class="steps">Tap <strong>•••</strong> at the top right, then choose <strong>Open in browser</strong>.</div>
+      <button class="store-button" id="try-again" type="button">Try again</button>
+      <button class="secondary" id="copy-link" type="button">Copy App Store link</button>
+    </div>
+  </dialog>
+
+  <script>
+    (function () {
+      var storeURL = "https://apps.apple.com/app/id6796871183";
+      var handoff = window.ReadOftenAppStore;
+      var page = document.getElementById("handoff-page");
+      var link = document.getElementById("open-store");
+      var dialog = document.getElementById("fallback");
+      var retry = document.getElementById("try-again");
+      var copy = document.getElementById("copy-link");
+      var escaped = false;
+      var preview = new URLSearchParams(window.location.search).has("preview");
+
+      function markEscaped() { escaped = true; }
+      document.addEventListener("visibilitychange", function () { if (document.hidden) markEscaped(); });
+      window.addEventListener("pagehide", markEscaped);
+      window.addEventListener("blur", markEscaped);
+
+      if (!handoff.isInApp() && !preview) {
+        window.location.replace(storeURL);
+        return;
+      }
+
+      function openFromGesture(event) {
+        if (event) {
+          event.preventDefault();
+          if (event.currentTarget === link) event.stopPropagation();
+        }
+        handoff.breakOut(storeURL);
+      }
+
+      link.addEventListener("click", openFromGesture);
+      page.addEventListener("click", openFromGesture);
+      retry.addEventListener("click", function (event) {
+        event.stopPropagation();
+        handoff.breakOut(storeURL);
+      });
+      copy.addEventListener("click", function (event) {
+        event.stopPropagation();
+        navigator.clipboard.writeText(storeURL).then(function () {
+          copy.textContent = "Link copied";
+        });
+      });
+
+      // Some in-app browsers permit a zero-tap escape. The visible page remains
+      // the fallback for browsers that require a fresh user gesture.
+      if (!preview) handoff.breakOut(storeURL);
+      window.setTimeout(function () {
+        if (!escaped && !dialog.open) dialog.showModal();
+      }, 1500);
+    }());
+  </script>
 </body>
 </html>
